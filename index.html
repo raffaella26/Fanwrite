@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微头条仿写助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #ff6b35;
+        }
+
+        .input-field[type="password"] {
+            font-family: monospace;
+        }
+
+        .api-key-container {
+            position: relative;
+        }
+
+        .api-key-link {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: #ff6b35;
+            text-decoration: none;
+        }
+
+        .api-key-link:hover {
+            text-decoration: underline;
+        }
+
+        .textarea-container {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px 16px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #ff6b35;
+        }
+
+        .word-count {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 14px;
+            color: #999;
+            background: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .advanced-settings {
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .advanced-header {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .advanced-header:hover {
+            background: #f1f3f4;
+        }
+
+        .advanced-content {
+            padding: 16px;
+            border-top: 1px solid #e1e1e1;
+            display: none;
+        }
+
+        .advanced-content.show {
+            display: block;
+        }
+
+        .arrow {
+            transition: transform 0.3s;
+        }
+
+        .arrow.rotated {
+            transform: rotate(90deg);
+        }
+
+        .form-row {
+            margin-bottom: 15px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .radio-item input[type="radio"] {
+            margin: 0;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .cost-info {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ff6b35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #c33;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .regenerate-btn {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: 1px solid #e1e1e1;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .regenerate-btn:hover {
+            background: #f1f3f4;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .result-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .result-content {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #444;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+        }
+
+        .result-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-btn {
+            padding: 6px 12px;
+            background: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #e55a2b;
+        }
+
+        .copy-btn.copied {
+            background: #28a745;
+        }
+
+        .result-word-count {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .security-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #856404;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>微头条仿写助手</h1>
+            <p>输入原文，一键生成风格相似的新文案</p>
+        </div>
+
+        <div class="content">
+            <div class="security-notice">
+                ⚠️ 本工具在本地运行，API Key 仅存储在你自己的浏览器中，不会上传到任何服务器<br>
+                💡 已部署到 GitHub Pages，可永久使用
+            </div>
+
+            <div class="section">
+                <div class="input-group">
+                    <label class="input-label">Anthropic API Key</label>
+                    <div class="api-key-container">
+                        <input type="password" id="apiKey" class="input-field" placeholder="请输入你的 LongCat API Key">
+                        <a href="https://api.longcat.chat" target="_blank" class="api-key-link">如何获取 API Key？</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="input-group">
+                    <label class="input-label">原始文案</label>
+                    <div class="textarea-container">
+                        <textarea id="originalText" placeholder="在这里粘贴你想仿写的微头条文案..." maxlength="1000"></textarea>
+                        <div class="word-count" id="wordCount">已输入 0 字</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="advanced-settings">
+                    <div class="advanced-header" id="advancedHeader">
+                        <span>高级设置（可选）</span>
+                        <span class="arrow">▶</span>
+                    </div>
+                    <div class="advanced-content" id="advancedContent">
+                        <div class="form-row">
+                            <label class="input-label">仿写主题</label>
+                            <input type="text" id="theme" class="input-field" placeholder="留空则保持与原文相近的主题">
+                        </div>
+                        <div class="form-row">
+                            <label class="input-label">生成数量</label>
+                            <select id="quantity" class="input-field">
+                                <option value="1">1 篇</option>
+                                <option value="2">2 篇</option>
+                                <option value="3">3 篇</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label class="input-label">风格偏好</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="style" value="与原文一致" checked>
+                                    <span>与原文一致</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="style" value="更口语化">
+                                    <span>更口语化</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="style" value="更正式">
+                                    <span>更正式</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <button class="generate-btn" id="generateBtn">
+                <span id="generateBtnText">生成仿写文案</span>
+            </button>
+
+            <div class="cost-info">
+                预估费用：每次调用约 ¥0.01
+            </div>
+
+            <div class="results-section" id="resultsSection">
+                <div class="results-header">
+                    <h3 class="section-title">生成结果</h3>
+                    <button class="regenerate-btn" id="regenerateBtn">重新生成</button>
+                </div>
+                <div id="resultsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM 元素
+        const apiKeyInput = document.getElementById('apiKey');
+        const originalTextInput = document.getElementById('originalText');
+        const wordCountDisplay = document.getElementById('wordCount');
+        const advancedHeader = document.getElementById('advancedHeader');
+        const advancedContent = document.getElementById('advancedContent');
+        const themeInput = document.getElementById('theme');
+        const quantitySelect = document.getElementById('quantity');
+        const styleRadios = document.querySelectorAll('input[name="style"]');
+        const generateBtn = document.getElementById('generateBtn');
+        const generateBtnText = document.getElementById('generateBtnText');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const regenerateBtn = document.getElementById('regenerateBtn');
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 从 localStorage 加载 API Key
+            const savedApiKey = localStorage.getItem('claude_api_key');
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+            }
+
+            // 字数统计
+            originalTextInput.addEventListener('input', updateWordCount);
+
+            // 高级设置切换
+            advancedHeader.addEventListener('click', toggleAdvancedSettings);
+
+            // 生成按钮点击
+            generateBtn.addEventListener('click', generateContent);
+
+            // 重新生成按钮点击
+            regenerateBtn.addEventListener('click', generateContent);
+
+            // API Key 保存到 localStorage
+            apiKeyInput.addEventListener('input', function() {
+                localStorage.setItem('claude_api_key', this.value);
+            });
+
+            updateWordCount();
+        });
+
+        // 更新字数统计
+        function updateWordCount() {
+            const text = originalTextInput.value;
+            const count = text.length;
+            wordCountDisplay.textContent = `已输入 ${count} 字`;
+        }
+
+        // 切换高级设置
+        function toggleAdvancedSettings() {
+            advancedContent.classList.toggle('show');
+            const arrow = advancedHeader.querySelector('.arrow');
+            arrow.classList.toggle('rotated');
+        }
+
+        // 获取选中的风格
+        function getSelectedStyle() {
+            for (const radio of styleRadios) {
+                if (radio.checked) {
+                    return radio.value;
+                }
+            }
+            return '与原文一致';
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
+
+        // 隐藏错误信息
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            generateBtn.disabled = true;
+            generateBtnText.innerHTML = '<div class="loading"></div>正在生成中...';
+        }
+
+        // 隐藏加载状态
+        function hideLoading() {
+            generateBtn.disabled = false;
+            generateBtnText.textContent = '生成仿写文案';
+        }
+
+        // 生成内容
+        async function generateContent() {
+            const apiKey = apiKeyInput.value.trim();
+            const originalText = originalTextInput.value.trim();
+
+            // 验证输入
+            if (!apiKey) {
+                showError('请先填写 API Key');
+                return;
+            }
+
+            if (!originalText) {
+                showError('请输入需要仿写的原始文案');
+                return;
+            }
+
+            // 检查是否在本地文件协议下运行
+            if (window.location.protocol === 'file:') {
+                showError('⚠️ 由于浏览器安全限制，请通过本地服务器运行此工具。\n\n解决方法：\n1. 双击运行同目录下的 "启动服务器.command"\n2. 打开浏览器访问 http://localhost:8000');
+                return;
+            }
+
+            hideError();
+            showLoading();
+
+            try {
+                const theme = themeInput.value.trim();
+                const quantity = parseInt(quantitySelect.value);
+                const style = getSelectedStyle();
+
+                const response = await callClaudeAPI(apiKey, originalText, theme, quantity, style);
+                displayResults(response, quantity);
+                resultsSection.classList.add('show');
+            } catch (error) {
+                showError(getErrorMessage(error));
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // 调用 Claude API
+        async function callClaudeAPI(apiKey, originalText, theme, quantity, style) {
+            const systemPrompt = `你是一位专业的微头条文案创作专家。你擅长分析文案的写作风格、句式结构、情绪节奏和表达技巧，并能创作出风格高度相似但内容全新的文案。
+
+规则：
+1. 仔细分析原文的：开头方式、句子长短节奏、用词习惯、情感基调、结尾方式
+2. 保持与原文相似的写作风格和结构，但内容必须完全原创
+3. 字数控制在原文的 80%~120% 左右
+4. 直接输出文案正文，不要加任何解释、前缀或标注
+5. 不要照抄原文中的具体事例或数据，换成类似但不同的内容`;
+
+            const userPrompt = `请仿写以下微头条文案。
+
+【原文】
+${originalText}
+
+【要求】
+- 仿写主题：${theme || '与原文保持相近'}
+- 风格偏好：${style}
+- 生成数量：${quantity} 篇
+
+${quantity > 1 ? '请用"===版本分隔符===" 将各篇分开' : ''}`;
+
+            const response = await fetch('https://api.longcat.chat/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 1000,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: systemPrompt
+                        },
+                        {
+                            role: 'user',
+                            content: userPrompt
+                        }
+                    ]
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw {
+                    status: response.status,
+                    message: errorData.error?.message || 'API 调用失败'
+                };
+            }
+
+            const data = await response.json();
+
+            // LongCat API 返回格式可能不同，需要适配
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+                return data.choices[0].message.content;
+            } else if (data.content && data.content[0] && data.content[0].text) {
+                return data.content[0].text;
+            } else {
+                throw {
+                    status: response.status,
+                    message: 'API 返回格式异常'
+                };
+            }
+        }
+
+        // 获取错误信息
+        function getErrorMessage(error) {
+            if (error.status === 401) {
+                return 'API Key 无效，请检查后重试';
+            } else if (error.status === 429) {
+                return '请求过于频繁，请稍后再试';
+            } else if (error.status === 500) {
+                return '服务器错误，请稍后再试';
+            } else if (error.message) {
+                return error.message;
+            } else {
+                return '网络错误，请检查网络连接后重试';
+            }
+        }
+
+        // 显示结果
+        function displayResults(text, quantity) {
+            resultsContainer.innerHTML = '';
+
+            if (quantity === 1) {
+                addResultCard(text, 1);
+            } else {
+                const parts = text.split('===版本分隔符===');
+                parts.forEach((part, index) => {
+                    const trimmedPart = part.trim();
+                    if (trimmedPart) {
+                        addResultCard(trimmedPart, index + 1);
+                    }
+                });
+            }
+        }
+
+        // 添加结果卡片
+        function addResultCard(content, version) {
+            const card = document.createElement('div');
+            card.className = 'result-card';
+            card.innerHTML = `
+                <div class="result-title">仿写版本 ${version}</div>
+                <div class="result-content">${content}</div>
+                <div class="result-footer">
+                    <button class="copy-btn">一键复制</button>
+                    <span class="result-word-count">${content.length} 字</span>
+                </div>
+            `;
+
+            const copyBtn = card.querySelector('.copy-btn');
+            copyBtn.addEventListener('click', function() {
+                navigator.clipboard.writeText(content).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = '已复制！';
+                    this.classList.add('copied');
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.classList.remove('copied');
+                    }, 2000);
+                }).catch(() => {
+                    // 降级方案
+                    const textarea = document.createElement('textarea');
+                    textarea.value = content;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+
+                    const originalText = this.textContent;
+                    this.textContent = '已复制！';
+                    this.classList.add('copied');
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.classList.remove('copied');
+                    }, 2000);
+                });
+            });
+
+            resultsContainer.appendChild(card);
+        }
+    </script>
+</body>
+</html>
